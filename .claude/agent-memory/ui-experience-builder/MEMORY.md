@@ -1,0 +1,3 @@
+- [Clock API location](project_clock_api.md) — kotlinx-datetime 0.7.1 in this repo means `Clock` lives in `kotlin.time`, not `kotlinx.datetime`; some pre-existing files still use the wrong import.
+- [Compose colors in non-composable lambdas](feedback_compose_color_lambdas.md) — `Candy.colors`/`typography`/`shapes` are @Composable getters; capture into a local val before using inside `drawBehind`/`Canvas` lambdas.
+- [App identity](project_app_identity.md) — candy-themed KMP wellness app with planner/mood/focus/notes/kindness feature modules under `feature/`, theme tokens in `ui/theme/`.

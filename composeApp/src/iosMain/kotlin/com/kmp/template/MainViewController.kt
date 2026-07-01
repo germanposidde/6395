@@ -1,4 +1,4 @@
-package com.kmp.template
+package com.kmp.hook
 
 import androidx.compose.ui.window.ComposeUIViewController
 

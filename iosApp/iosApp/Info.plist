@@ -2,6 +2,12 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>CFBundleDisplayName</key>
+	<string>Hookara Fury</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Allow camera access to take photos of your fish groups.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Allow photo library access to add existing photos to your fish groups.</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>NSAppTransportSecurity</key>

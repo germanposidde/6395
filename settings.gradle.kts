@@ -1,4 +1,4 @@
-rootProject.name = "Template"
+rootProject.name = "HookaraFury6394"
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {
