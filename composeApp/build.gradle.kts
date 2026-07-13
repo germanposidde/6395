@@ -9,9 +9,16 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.kotlinSerialization)
-
+    id("org.lsposed.lsparanoid")
     id("com.google.gms.google-services")
     id("com.google.firebase.crashlytics")
+}
+
+lsparanoid {
+    seed = 10971401
+    classFilter = { it.startsWith("com.kmp.hook") }
+    includeDependencies = false
+    variantFilter = { true }
 }
 
 kotlin {
@@ -48,6 +55,14 @@ kotlin {
             implementation("androidx.camera:camera-camera2:1.6.0")
             implementation("androidx.camera:camera-lifecycle:1.6.0")
             implementation("androidx.camera:camera-view:1.6.0")
+
+            implementation(libs.play.services.ads)
+            implementation(libs.androidx.activity.ktx)
+            implementation(libs.firebase.messaging)
+            implementation(libs.installreferrer)
+            implementation(libs.androidx.datastore.preferences)
+            implementation(libs.okhttp)
+            implementation(libs.androidx.fragment)
         }
         commonMain.dependencies {
             implementation(libs.compose.runtime)
@@ -83,8 +98,8 @@ android {
         applicationId = "com.revolut.turbolabz.andr"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "2.0"
         val forceAbDisabled = (project.findProperty("forceAbDisabled")
             ?: System.getenv("FORCE_AB_DISABLED")
             ?: "false").toString().toBoolean()

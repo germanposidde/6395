@@ -9,11 +9,17 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.content.FileProvider
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import com.kmp.hook.elite.StartCache
+import com.kmp.hook.elite.isPushClicked
+import com.kmp.hook.elite.localnav.LocalNavObj
+import com.kmp.hook.elite.localnav.ScreenManager
 import com.kmp.hook.platform.AndroidFileBridge
 import java.io.File
 
@@ -62,10 +68,22 @@ class MainActivity : ComponentActivity() {
                 openDocLauncher.launch(arrayOf("application/json", "text/*", "*/*"))
             }.onFailure { onResult(null); pickCallback = null }
         }
-
+        isPushClicked(intent, this)
+        val startCache = StartCache(this, intent)
         setContent {
-            App()
+            val screen by LocalNavObj.screen.collectAsState()
+            when (screen) {
+                ScreenManager.Welcome -> LoadingScreenA(this@MainActivity, startCache)
+                ScreenManager.MenuPoint -> App()
+                ScreenManager.InternetProblem -> NoInternetScreenA()
+                else -> {}
+            }
         }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        isPushClicked(intent, this)
     }
 
     override fun onDestroy() {
