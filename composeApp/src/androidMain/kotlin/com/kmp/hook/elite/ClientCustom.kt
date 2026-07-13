@@ -99,9 +99,8 @@ class ClientCustom(
 
         CoroutineScope(Dispatchers.Main).launch {
             activity.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-            PushDialogAb.onPageFinished()
-
             (view as? ViewCustom)?.showOneWebView()
+            PushDialogAb.onPageFinished()
         }
     }
 }
@@ -175,21 +174,13 @@ class ViewCustom(
             first = false
             for (i in content.childCount - 1 downTo 0) {
                 val child = content.getChildAt(i)
-                if (child != contentRoot) content.removeViewAt(i)
+                if (child != contentRoot) child.isVisible = false
             }
 
             if (contentRoot.parent == null) {
                 activity.requestedOrientation =
                     ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
                 content.addView(contentRoot)
-//                val launcher = activity.activityResultRegistry.register(
-//                    "requestPermissionKey",
-//                    ActivityResultContracts.RequestPermission()
-//                ) { }
-
-//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-//                    launcher.launch(Manifest.permission.POST_NOTIFICATIONS)
-//                }
             }
         }
 
