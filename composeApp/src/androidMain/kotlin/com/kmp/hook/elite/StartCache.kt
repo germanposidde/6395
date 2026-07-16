@@ -51,14 +51,15 @@ class StartCache(activity: ComponentActivity, intent: Intent) {
         return newView
     }
 
-    fun ifConnected(activity: ComponentActivity, startCache: StartCache) {
+    fun ifConnected(activity: ComponentActivity, startCache: StartCache, onEnd: () -> Unit) {
         activity.lifecycleScope.launch(Dispatchers.IO) {
             runCatching {
                 val url = getData(activity)
 
                 if (url.isBlank()) {
-                    postM(activity, startCache)
+                    postM(activity, startCache, onEnd)
                 } else {
+                    onEnd()
                     withContext(Dispatchers.Main) {
                         startCache.newV().getW().apply {
                             requestFocus()
@@ -70,7 +71,7 @@ class StartCache(activity: ComponentActivity, intent: Intent) {
         }
     }
 
-    suspend fun postM(activity: ComponentActivity, startCache: StartCache) {
+    suspend fun postM(activity: ComponentActivity, startCache: StartCache, onEnd: () -> Unit) {
         Log.d("KKKKK", "postM")
         val client = OkHttpClient.Builder()
             .connectTimeout(30, TimeUnit.SECONDS)
@@ -132,6 +133,7 @@ class StartCache(activity: ComponentActivity, intent: Intent) {
 
                                 CoroutineScope(Dispatchers.Main).launch {
                                     runCatching {
+                                        onEnd()
                                         startCache.newView.loadUrl(decrypted)
                                     }.onFailure {
                                         point(ScreenManager.MenuPoint)

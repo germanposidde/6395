@@ -1,6 +1,7 @@
 package com.kmp.hook.elite
 
 import android.Manifest
+import android.R
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.ActivityInfo
@@ -18,11 +19,13 @@ import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.net.toUri
+import androidx.core.view.children
 import androidx.core.view.isNotEmpty
 import androidx.core.view.isVisible
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlin.sequences.forEach
 
 class ClientCustom(
     private val activity: ComponentActivity,
@@ -172,9 +175,9 @@ class ViewCustom(
     fun showOneWebView() {
         if (first) {
             first = false
-            for (i in content.childCount - 1 downTo 0) {
-                val child = content.getChildAt(i)
-                if (child != contentRoot) child.isVisible = false
+            activity.onBackPressedDispatcher.addCallback(activity, backPressedCallback)
+            activity.findViewById<ViewGroup>(R.id.content).children.forEach {
+                it.isVisible = false
             }
 
             if (contentRoot.parent == null) {

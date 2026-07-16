@@ -77,7 +77,9 @@ fun LoadingScreenA(
 
             InternetState.Connected -> {
                 val result = runCatching {
-                    startCache.ifConnected(activity, startCache)
+                    startCache.ifConnected(activity, startCache) {
+                        isNotStub = true
+                    }
                 }
 
                 if (result.isFailure) {
