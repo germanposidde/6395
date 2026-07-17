@@ -4,7 +4,7 @@ from typing import Optional
 import requests
 
 from . import codemagic, jira, metadata_gen, sheets, utils
-from .config import Cache, GlobalConfig
+from .config import GlobalConfig
 from .constants import SHEET_TEMPLATE_TAB
 
 
@@ -21,7 +21,6 @@ class Preflight:
 
 def run(
     cfg: GlobalConfig,
-    cache: Cache,
     jc: jira.JiraClient,
     ticket: jira.AppTicket,
     ticket_number: str,
@@ -32,11 +31,11 @@ def run(
     p8_contents = _download_p8(jc, ticket)
 
     print("\n→ Codemagic...")
-    cm, cm_app = _codemagic(cache, ticket_number, ticket)
+    cm, cm_app = _codemagic(ticket_number, ticket)
     gh_username, gh_repo = _derive_github_repo(cm_app)
 
     print("\n→ GitHub...")
-    gh_username = _github(cache, gh_username, gh_repo, ticket)
+    gh_username = _github(gh_username, gh_repo, ticket)
 
     print("\n→ Google Sheets...")
     sh = _google_sheets(cfg)
@@ -56,9 +55,20 @@ def run(
 
 
 def _download_p8(jc: jira.JiraClient, ticket: jira.AppTicket) -> str:
-    p8s = [a for a in ticket.attachments if a.get("filename", "").lower().endswith(".p8")]
+    def _p8s(attachments):
+        return [a for a in attachments or [] if a.get("filename", "").lower().endswith(".p8")]
+
+    src = ticket.key
+    p8s = _p8s(ticket.attachments)
+    if not p8s and ticket.parent_key:
+        print(f"  No .p8 on {ticket.key}; checking parent {ticket.parent_key}...")
+        p8s = _p8s(jc._get_attachments(ticket.parent_key))
+        if p8s:
+            src = ticket.parent_key
     if not p8s:
-        utils.die("No .p8 attachment on the Jira ticket")
+        utils.die(f"No .p8 attachment on {ticket.key} or its parent")
+    if src != ticket.key:
+        print(f"  Using .p8 from parent {src}")
     expected = [f"{ticket.key_id}.p8", f"AuthKey_{ticket.key_id}.p8"]
     match = next((a for a in p8s if a.get("filename") in expected), None)
     if not match:
@@ -80,15 +90,10 @@ def _download_p8(jc: jira.JiraClient, ticket: jira.AppTicket) -> str:
     return contents
 
 
-def _codemagic(cache: Cache, ticket_number: str, ticket: jira.AppTicket):
-    token = (
-        ticket.codemagic_api_token
-        or cache.get("codemagic.apiToken")
-        or utils.prompt("Codemagic API token")
-    )
+def _codemagic(ticket_number: str, ticket: jira.AppTicket):
+    token = ticket.codemagic_api_token or utils.prompt("Codemagic API token")
     if ticket.codemagic_api_token:
         print("  Using Codemagic API token from Jira ticket")
-    cache.set("codemagic.apiToken", token)
     cm = codemagic.CodemagicClient(token)
     apps = cm.list_apps()
     if len(apps) == 1:
@@ -120,21 +125,11 @@ def _derive_github_repo(cm_app: dict):
     return None, None
 
 
-def _github(cache: Cache, derived_username, derived_repo, ticket: jira.AppTicket):
-    username = (
-        derived_username
-        or cache.get("github.username")
-        or utils.prompt("GitHub username (production account)")
-    )
-    token = (
-        ticket.github_token
-        or cache.get("github.token")
-        or utils.prompt("GitHub PAT for production account")
-    )
+def _github(derived_username, derived_repo, ticket: jira.AppTicket):
+    username = derived_username or utils.prompt("GitHub username (production account)")
+    token = ticket.github_token or utils.prompt("GitHub PAT for production account")
     if ticket.github_token:
         print("  Using GitHub token from Jira ticket")
-    cache.set("github.username", username)
-    cache.set("github.token", token)
     try:
         r = requests.get(
             "https://api.github.com/user", auth=(username, token), timeout=15
