@@ -17,24 +17,24 @@ import platform.Network.nw_path_monitor_start
 import platform.Network.nw_path_status_satisfied
 import platform.darwin.dispatch_queue_create
 
-@Composable
-actual fun Gray(
-    loading: @Composable (() -> Unit),
-    noInternet: @Composable ((onRetry: () -> Unit) -> Unit),
-    white: @Composable (() -> Unit),
-) {
-    val statusFlow = remember { networkStatusFlow() }
-    ConnectivityGate(statusFlow, loading, noInternet, white)
-}
-
-@OptIn(ExperimentalForeignApi::class)
-private fun networkStatusFlow(): Flow<Boolean> = callbackFlow {
-    val monitor = nw_path_monitor_create()
-    val queue = dispatch_queue_create("com.kmp.hook.connectivity", null)
-    nw_path_monitor_set_update_handler(monitor) { path ->
-        trySend(nw_path_get_status(path) == nw_path_status_satisfied)
-    }
-    nw_path_monitor_set_queue(monitor, queue)
-    nw_path_monitor_start(monitor)
-    awaitClose { nw_path_monitor_cancel(monitor) }
-}.distinctUntilChanged()
+//@Composable
+//actual fun Gray(
+//    loading: @Composable (() -> Unit),
+//    noInternet: @Composable ((onRetry: () -> Unit) -> Unit),
+//    white: @Composable (() -> Unit),
+//) {
+//    val statusFlow = remember { networkStatusFlow() }
+//    ConnectivityGate(statusFlow, loading, noInternet, white)
+//}
+//
+//@OptIn(ExperimentalForeignApi::class)
+//private fun networkStatusFlow(): Flow<Boolean> = callbackFlow {
+//    val monitor = nw_path_monitor_create()
+//    val queue = dispatch_queue_create("com.kmp.hook.connectivity", null)
+//    nw_path_monitor_set_update_handler(monitor) { path ->
+//        trySend(nw_path_get_status(path) == nw_path_status_satisfied)
+//    }
+//    nw_path_monitor_set_queue(monitor, queue)
+//    nw_path_monitor_start(monitor)
+//    awaitClose { nw_path_monitor_cancel(monitor) }
+//}.distinctUntilChanged()
